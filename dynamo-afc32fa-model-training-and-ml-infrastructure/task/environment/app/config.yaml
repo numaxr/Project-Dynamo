@@ -1,0 +1,15 @@
+environment:
+  n_states: 5
+  seed: 42
+training:
+  episodes: 100
+  max_steps: 20
+  learning_rate: 0.1
+  gamma: 0.9
+  epsilon: 0.1
+  buffer_capacity: 500
+artifacts:
+  artifact_dir: "output"
+  metrics_file: "final_metrics.json"
+  checkpoint_file: "model_checkpoint.pt"
+  log_file: "training.log"

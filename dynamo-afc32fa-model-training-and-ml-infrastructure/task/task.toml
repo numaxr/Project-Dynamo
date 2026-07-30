@@ -1,0 +1,35 @@
+artifacts = [
+  "/app/task/environment/app/output/final_metrics.json",
+  "/app/task/environment/app/output/model_checkpoint.pt",
+  "/app/task/environment/app/output/training.log"
+]
+
+[task]
+name = "dynamo/rl-pipeline-repair"
+
+[metadata]
+category = "Model Training and ML Infrastructure"
+subcategory = "Reinforcement learning"
+model_tested = "Opus-4.8"
+agent_tested = "Terminus-2"
+task_objective = ["debug", "fix"]
+artifact_type = ["codebase", "configuration_file", "output_log"]
+expert_time_estimate_hours = 2
+difficulty_explanation = "This synthetic RL infrastructure task models real-world pipeline regressions encountered by applied ML platform engineers when migrating training code between execution environments. The task requires diagnosing four interacting defects without explicit inline hints: (1) handling configuration key mismatches between 'output_dir' and 'artifact_dir', (2) fixing unseeded global random sampling in the experience replay buffer to restore deterministic sampling via dedicated RNGs, (3) un-nesting the PyTorch model checkpoint payload structure to expose top-level state dictionary fields, and (4) aligning training metric output payload keys from 'training_metrics' to 'metrics'."
+solution_explanation = "To resolve the regressions: (1) Update artifact_manager.py to fall back to 'artifact_dir' when 'output_dir' is missing in config.yaml, (2) Replace random.sample with self.rng.sample in replay_buffer.py to ensure deterministic sampling, (3) Flatten the checkpoint dictionary in trainer.py so episodes_completed, buffer_size, and q_table sit directly under state_dict, and (4) Update trainer.py to save the metrics payload under the key 'metrics' rather than 'training_metrics' in final_metrics.json. Then run train.py to produce the verified artifacts."
+verification_explanation = "The verifier executes the training pipeline in a clean container and checks the resulting output files at /app/task/environment/app/output. It validates that final_metrics.json, model_checkpoint.pt, and training.log are generated with the exact required schemas, version tags, and deterministic values."
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 120.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
